@@ -36,11 +36,12 @@ The aim of this application is to integrate a document management system directl
 14. In the 'OAuth2 URL Generator' section, check 'applications.commands' and 'bot'. After a list of 'Bot Permissions' appears, check 'administrator' and copy the resulting link into your browser. Choose the server you want to add the bot to and click 'Authorize'.
 15. Update the following environment variables in your .env file:
 
-`APP_BASE_URL=http://localhost:3000
-DISCORD_BOT_TOKEN=your-bot-token
-DISCORD_CLIENT_ID=your-client-id
-DISCORD_CLIENT_SECRET=your-client-secret
-DISCORD_CALLBACK_URL=http://localhost:3000/auth/callback`
+
+        APP_BASE_URL=http://localhost:3000
+        DISCORD_BOT_TOKEN=your-bot-token  
+        DISCORD_CLIENT_ID=your-client-id  
+        DISCORD_CLIENT_SECRET=your-client-secret 
+        DISCORD_CALLBACK_URL=http://localhost:3000/auth/callback
 
 16. Clone the repository with `git clone https://github.com/p-stoney/collaboration-discord-bot`.
 17. Navigate to the project directory with `cd backend`.
@@ -53,10 +54,10 @@ DISCORD_CALLBACK_URL=http://localhost:3000/auth/callback`
 2. Type `register`, and the bot will provide a registration link to register your account with the application.
 3. Other available commands:
 
-`/create <title>` to create a new document
-`/share <docId> <users> <permission>` to share a document with another user
-`/list` to list all accessible documents
-`/download` to download a document to your local machine
+        `/create <title>` to create a new document
+        `/share <docId> <users> <permission>` to share a document with another user
+        `/list` to list all accessible documents
+        `/download` to download a document to your local machine
 
 ### Notes and Next Steps
 
