@@ -6,12 +6,12 @@ The aim of this application is to integrate a document management system directl
 
 ### Key Technologies
 
-**TypeScript:** Ensures type safety, improves code readability and maintainability.
-**Nest.js:** Progressive Node.js framework for building efficient and scalable server-side applications.
-**Discord.js:** Robust library for interacting with the Discord API and creating Discord bots.
-**MongoDB Atlas:** Cloud-based MongoDB service for storing and managing data.
-**Mongoose:** Schema-based solution for MongoDB validation, casting, and business logic.
-**Passport:** Flexible authentication middleware for Node.js. Used here to simplify OAuth2 flow.
+   **TypeScript:** Ensures type safety, improves code readability and maintainability.    
+   **Nest.js:** Progressive Node.js framework for building efficient and scalable server-side applications.    
+   **Discord.js:** Robust library for interacting with the Discord API and creating Discord bots.    
+   **MongoDB Atlas:** Cloud-based MongoDB service for storing and managing data.    
+   **Mongoose:** Schema-based solution for MongoDB validation, casting, and business logic.    
+   **Passport:** Flexible authentication middleware for Node.js. Used here to simplify OAuth2 flow.    
 
 ### Setup Instructions
 
