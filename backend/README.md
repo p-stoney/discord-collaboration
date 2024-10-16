@@ -22,7 +22,7 @@ The aim of this application is to integrate a document management system directl
 3. Navigate to 'Database Access' and create a new database user by setting a username and password.
 4. Navigate to 'Network Access' and allow access from your IP address.
 5. Navigate to 'Clusters' and click 'Connect' for your cluster. Choose to 'Connect your application'.
-6. Copy the provided connection string into your .env file, setting it to variable `MONGO_URI`.
+6. Rename .env.example to .env and copy the provided connection string into the .env file, setting it to variable `MONGO_URI`.
 
 **Discord Bot Setup**
 
