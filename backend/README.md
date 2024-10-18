@@ -51,7 +51,8 @@ The aim of this application is to integrate a document management system directl
 16. Clone the repository with `git clone https://github.com/p-stoney/collaboration-discord-bot`.
 17. Navigate to the project directory with `cd backend` + install dependencies with `npm install`.
 19. Navigate to the frontend directory with `cd frontend` + install dependencies with `npm install`. Build static webpage with `npm run build`.
-20. Navigate back to project directory with `cd ..`. Build and start the application with `npm run start`. The application should now be running on `http://localhost:3000`.
+20. Ensure redis is running with `docker run --name redis -p 6379:6379 -d redis`. Use `redis-cli ping` to confirm.
+21. Navigate back to project directory with `cd ..`. Build and start the application with `npm run start`. The application should now be running on `http://localhost:3000`.
 
 ### How to Interact
 
