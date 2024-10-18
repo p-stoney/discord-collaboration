@@ -16,6 +16,7 @@ The aim of this application is to integrate a document management system directl
    **MongoDB Atlas:** Cloud-based MongoDB service for storing and managing data.    
    **Mongoose:** Schema-based solution for MongoDB validation, casting, and business logic.    
    **Passport:** Flexible authentication middleware for Node.js. Used here to simplify OAuth2 flow.    
+   **Socket.IO:** Event-driven library enabling real-time communication between browser client and backend.
 
 ### Setup Instructions
 
@@ -48,9 +49,9 @@ The aim of this application is to integrate a document management system directl
         DISCORD_CALLBACK_URL=http://localhost:3000/auth/callback
 
 16. Clone the repository with `git clone https://github.com/p-stoney/collaboration-discord-bot`.
-17. Navigate to the project directory with `cd backend`.
-18. Install dependencies with `npm install`.
-19. Build and start the application with `npm run start`. The application should now be running on `http://localhost:3000`.
+17. Navigate to the project directory with `cd backend` + install dependencies with `npm install`.
+19. Navigate to the frontend directory with `cd frontend` + install dependencies with `npm install`. Build static webpage with `npm run build`.
+20. Navigate back to project directory with `cd ..`. Build and start the application with `npm run start`. The application should now be running on `http://localhost:3000`.
 
 ### How to Interact
 
