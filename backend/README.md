@@ -1,5 +1,9 @@
 ## Document Collaboration Discord Bot
 
+### Note to Turing Reviewers
+
+Due to the extensive setup involved with MongoDB Atlas and Discord Developer Portal, I will privately message you on Discord with the contents of my .env to streamline the process on your end.
+
 ### Overview
 
 The aim of this application is to integrate a document management system directly into Discord by interfacing with a built-in Discord bot. It presents an accessible alternative to existing collaborative software solutions that is decoupled from external providers (see: Google Docs, OnlyOffice), feature-slim, and completely free. It serves a market at reduced scale, enabling collaborative document management for smaller scale teams, hobbyists, gamers, etc. Interfacing with the Discord bot allows users to seamlessly collaborate within their Discord environment without ever having to log in to a third party service.
@@ -54,15 +58,16 @@ The aim of this application is to integrate a document management system directl
 2. Type `register`, and the bot will provide a registration link to register your account with the application.
 3. Other available commands:
 
-        `/create <title>` to create a new document
-        `/share <docId> <users> <permission>` to share a document with another user
+        `/create` to create a new document
         `/list` to list all accessible documents
+        `/share` to share a document with another user
+        `/open` to open a document in your browser for editing
         `/download` to download a document to your local machine
 
 ### Notes and Next Steps
 
 This application is still in early development, and the repository currently only contains back-end logic. My intention when creating this application was to better familiarize myself with TypeScript and intermediate Node.js concepts and application architecture -- specifically modular design, cross-cutting concerns (validation, pipes, filters, guards, etc.) and holistic infrastructure and integration.
 
-Immediate-term development will involve improving user experience by replacing mere slash-command interactions with message components which would encapsulate interactions in buttons, select forms, modals, etc. Using the /share command as an example, its current form is obviously cumbersome as the user would need to find the docId, find the discordId of users they want to add, and type Permissions.READ each time. Message components are a strict necessity from an end-user perspective.
+Immediate-term development will involve improving user experience by replacing mere slash-command interactions with message components which would encapsulate interactions in buttons, select forms, modals, etc. Using the /share command as an example, its current form utilizes a cumbersome prompt/input approach. Message components are a strict necessity from an end-user perspective.
 
-Future front-end development will include browser-based collaboration as well as an embedded app interface for users to view and edit documents within the Discord application. The EventModule constitutes early backend logic for real-time collaborative editing and an embedded browser based extension of Discord chat. In the extreme long term, this would ideally be accomplished via operational transformation instead.
+Future front-end development will include an embedded app interface for users to view and edit documents within the Discord application. The EventModule constitutes early backend logic for real-time collaborative editing and an embedded browser based extension of Discord chat. In the long term, this would ideally be accomplished via operational transformation.
