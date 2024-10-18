@@ -25,9 +25,6 @@ describe('SessionSerializer', () => {
 
     serializer = moduleRef.get<SessionSerializer>(SessionSerializer);
     authService = moduleRef.get<AuthService>(AuthService);
-  });
-
-  beforeEach(() => {
     jest.clearAllMocks();
   });
 

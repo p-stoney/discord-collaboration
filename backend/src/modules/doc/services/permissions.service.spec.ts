@@ -26,9 +26,6 @@ describe('PermissionsService', () => {
 
     service = moduleRef.get<PermissionsService>(PermissionsService);
     docService = moduleRef.get<DocService>(DocService);
-  });
-
-  beforeEach(() => {
     jest.clearAllMocks();
   });
 

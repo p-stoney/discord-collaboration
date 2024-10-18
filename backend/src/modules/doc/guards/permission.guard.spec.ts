@@ -39,9 +39,6 @@ describe('PermissionGuard', () => {
     guard = moduleRef.get<PermissionGuard>(PermissionGuard);
     reflector = moduleRef.get<Reflector>(Reflector);
     permissionsService = moduleRef.get<PermissionsService>(PermissionsService);
-  });
-
-  beforeEach(() => {
     jest.clearAllMocks();
   });
 

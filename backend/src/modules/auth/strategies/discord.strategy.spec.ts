@@ -52,9 +52,6 @@ describe('DiscordStrategy', () => {
     strategy = moduleRef.get<DiscordStrategy>(DiscordStrategy);
     configService = moduleRef.get<ConfigService>(ConfigService);
     authService = moduleRef.get<AuthService>(AuthService);
-  });
-
-  beforeEach(() => {
     jest.clearAllMocks();
   });
 

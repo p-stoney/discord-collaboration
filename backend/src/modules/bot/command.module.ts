@@ -6,6 +6,7 @@ import {
   DownloadCommand,
   ListCommand,
   HelpCommand,
+  OpenCommand,
   RegisterCommand,
   ShareCommand,
 } from './commands';
@@ -18,9 +19,9 @@ import {
     DownloadCommand,
     ListCommand,
     HelpCommand,
+    OpenCommand,
     RegisterCommand,
     ShareCommand,
-    DocModule,
   ],
 })
 export class CommandsModule {}

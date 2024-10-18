@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { DocRepository } from '../repositories/doc.repository';
 import { DocVersionRepository } from '../repositories/doc-version.repository';
 import { DocDocument } from '../schemas/doc.schema';
+import { DocumentPermission } from '../enums/doc-permission.enum';
 import {
   CollaboratorDto,
   CreateDocDto,
@@ -45,12 +46,22 @@ export class DocService {
     const newDocData = {
       ...createDocDto,
       docId: `${createDocDto.ownerId}-${Date.now()}`,
-      content: '',
+      content: createDocDto.content || '',
       revision: 1,
+      collaborators: [
+        {
+          discordId: createDocDto.ownerId,
+          permission: DocumentPermission.ADMIN,
+        },
+      ],
     };
 
     const createdDoc = await this.repository.create(newDocData);
-    await this.versionRepository.create(createdDoc.toObject());
+
+    const versionData = createdDoc.toObject();
+    delete versionData._id;
+
+    await this.versionRepository.create(versionData);
 
     return createdDoc;
   }
@@ -75,7 +86,10 @@ export class DocService {
       updatedDocData
     );
 
-    await this.versionRepository.create(updatedDoc.toObject());
+    const versionData = updatedDoc.toObject();
+    delete versionData._id;
+
+    await this.versionRepository.create(versionData);
 
     return updatedDoc;
   }

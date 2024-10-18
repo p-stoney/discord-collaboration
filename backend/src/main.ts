@@ -1,18 +1,18 @@
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { getEnvVariable } from './utils/getEnvVariable';
-import { Environment } from './config/env.validation';
-import { getConnectionToken } from '@nestjs/mongoose';
 import session from 'express-session';
 import passport from 'passport';
-import MongoStore from 'connect-mongo';
-import { Connection } from 'mongoose';
 import { ValidationPipe } from '@nestjs/common';
 import { AuthExceptionFilter, HttpExceptionFilter } from './filters';
+import { SocketIoAdapter } from './adapters/socket-io.adapter';
+import RedisStore from 'connect-redis';
+import { createClient } from 'redis';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     snapshot: true,
   });
 
@@ -20,29 +20,29 @@ async function bootstrap() {
 
   const sessionSecret = getEnvVariable(configService, 'SESSION_SECRET');
   const port = parseInt(getEnvVariable(configService, 'PORT'), 10);
-  const nodeEnv = getEnvVariable(configService, 'NODE_ENV') as Environment;
 
-  const mongooseConnection = app.get<Connection>(getConnectionToken());
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+  });
 
-  app.use(
-    session({
-      secret: sessionSecret,
-      resave: false,
-      saveUninitialized: false,
-      store: MongoStore.create({
-        client: mongooseConnection.getClient(),
-        stringify: false,
-        autoRemove: 'interval',
-        autoRemoveInterval: 10,
-      }),
-      cookie: {
-        secure: nodeEnv === Environment.Production,
-        httpOnly: true,
-        sameSite: 'lax',
-        maxAge: 7200000,
-      },
-    })
-  );
+  const redisClient = createClient({ url: 'redis://localhost:6379' });
+  await redisClient.connect();
+
+  const sessionMiddleware = session({
+    store: new RedisStore({ client: redisClient }),
+    secret: sessionSecret,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: false,
+      httpOnly: true,
+      sameSite: false,
+      maxAge: 7200000,
+    },
+  });
+
+  app.use(sessionMiddleware);
 
   app.use(passport.initialize());
   app.use(passport.session());
@@ -57,6 +57,11 @@ async function bootstrap() {
       transform: true,
     })
   );
+
+  const redisIoAdapter = new SocketIoAdapter(app, sessionMiddleware);
+  await redisIoAdapter.connectToRedis();
+
+  app.useWebSocketAdapter(redisIoAdapter);
 
   await app.listen(port);
   console.log(`Application is running on: http://localhost:${port}`);

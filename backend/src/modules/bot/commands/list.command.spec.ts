@@ -21,9 +21,6 @@ describe('ListDocumentsCommand', () => {
   beforeEach(() => {
     docService = mockDocService as unknown as DocService;
     command = new ListCommand(docService);
-  });
-
-  beforeEach(() => {
     jest.clearAllMocks();
   });
 

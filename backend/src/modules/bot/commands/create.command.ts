@@ -1,14 +1,13 @@
-import { Command, Handler, IA } from '@discord-nestjs/core';
+import { Command, Handler, InteractionEvent } from '@discord-nestjs/core';
 import { Injectable, UseFilters } from '@nestjs/common';
 import { CommandExceptionFilter } from '../filters/command-exception.filter';
-import { SlashCommandPipe } from '@discord-nestjs/common';
-import { CreateDocumentDto } from './dtos';
 import { CommandInteraction } from 'discord.js';
 import { DocService } from '../../doc/services/doc.service';
+import { Message, TextChannel } from 'discord.js';
 
 @Command({
   name: 'create',
-  description: '/create <title> - Create a new document',
+  description: 'Create a new document',
 })
 @Injectable()
 @UseFilters(CommandExceptionFilter)
@@ -16,22 +15,61 @@ export class CreateCommand {
   constructor(private readonly docService: DocService) {}
 
   @Handler()
-  async onCreateDocument(
-    @IA(SlashCommandPipe) dto: CreateDocumentDto,
-    interaction: CommandInteraction
+  async onCreate(
+    @InteractionEvent() interaction: CommandInteraction
   ): Promise<void> {
-    const discordId = interaction.user.id;
-    const { title } = dto;
-
-    await this.docService.create({
-      ownerId: discordId,
-      title,
-      content: '',
-    });
+    const userId = interaction.user.id;
 
     await interaction.reply({
-      content: `Document "${title}" created successfully.`,
+      content: 'Please enter the title of the document:',
       ephemeral: true,
     });
+
+    const filter = (response: Message) => response.author.id === userId;
+
+    const channel = interaction.channel as TextChannel;
+
+    if (!channel) {
+      await interaction.followUp({
+        content: 'An error occurred: Unable to access the channel.',
+        ephemeral: true,
+      });
+      return;
+    }
+
+    channel
+      .awaitMessages({ filter, max: 1, time: 30000, errors: ['time'] })
+      .then(async (collected) => {
+        const response = collected.first();
+        const title = response?.content;
+
+        if (!title) {
+          await interaction.followUp({
+            content: 'No title was provided.',
+            ephemeral: true,
+          });
+          return;
+        }
+
+        await this.docService.create({
+          ownerId: userId,
+          title,
+          content: '',
+        });
+
+        await interaction.followUp({
+          content: `Document "${title}" created successfully.`,
+          ephemeral: true,
+        });
+
+        await response.delete();
+      })
+      .catch(async () => {
+        await interaction.followUp({
+          content:
+            'You did not provide a title in time (30 seconds). Please try again.',
+          ephemeral: true,
+        });
+      });
   }
 }

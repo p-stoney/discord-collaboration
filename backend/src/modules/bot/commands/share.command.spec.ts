@@ -36,9 +36,6 @@ describe('ShareDocumentCommand', () => {
     permissionsService =
       mockPermissionsService as unknown as PermissionsService;
     command = new ShareCommand(docService, permissionsService);
-  });
-
-  beforeEach(() => {
     jest.clearAllMocks();
   });
 

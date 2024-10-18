@@ -21,9 +21,6 @@ describe('AuthController', () => {
       .compile();
 
     controller = moduleRef.get<AuthController>(AuthController);
-  });
-
-  beforeEach(() => {
     jest.clearAllMocks();
   });
 

@@ -23,9 +23,6 @@ describe('RegisterCommand', () => {
   beforeEach(() => {
     configService = mockConfigService as unknown as ConfigService;
     command = new RegisterCommand(configService);
-  });
-
-  beforeEach(() => {
     jest.clearAllMocks();
   });
 

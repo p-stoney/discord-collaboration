@@ -31,9 +31,6 @@ describe('DocVersionRepository', () => {
     model = moduleRef.get<Model<DocVersionDocument>>(
       getModelToken(DocVersion.name)
     );
-  });
-
-  beforeEach(() => {
     jest.clearAllMocks();
   });
 

@@ -28,9 +28,6 @@ describe('AuthService', () => {
 
     service = moduleRef.get<AuthService>(AuthService);
     userService = moduleRef.get<UserService>(UserService);
-  });
-
-  beforeEach(() => {
     jest.clearAllMocks();
   });
 

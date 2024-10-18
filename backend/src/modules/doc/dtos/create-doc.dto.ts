@@ -1,7 +1,6 @@
 import {
   IsString,
   IsNotEmpty,
-  IsOptional,
   IsArray,
   ValidateNested,
   Length,
@@ -16,14 +15,11 @@ export class CreateDocDto {
   ownerId: string;
 
   @IsString()
-  @IsNotEmpty()
   title: string;
 
   @IsString()
-  @IsNotEmpty()
   content: string;
 
-  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CollaboratorDto)

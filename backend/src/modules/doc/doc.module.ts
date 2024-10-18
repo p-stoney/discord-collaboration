@@ -8,9 +8,12 @@ import { Doc, DocSchema } from './schemas/doc.schema';
 import { DocVersion, DocVersionSchema } from './schemas/doc-version.schema';
 import { PermissionsService } from './services/permissions.service';
 import { DocController } from './doc.controller';
+import { RedisModule } from '../../redis/redis.module';
+import { RedisService } from '../../redis/redis.service';
 
 @Module({
   imports: [
+    RedisModule,
     MongooseModule.forFeature([{ name: Doc.name, schema: DocSchema }]),
     MongooseModule.forFeature([
       { name: DocVersion.name, schema: DocVersionSchema },
@@ -22,6 +25,7 @@ import { DocController } from './doc.controller';
     DocService,
     PermissionsService,
     DocumentStateService,
+    RedisService,
   ],
   controllers: [DocController],
   exports: [

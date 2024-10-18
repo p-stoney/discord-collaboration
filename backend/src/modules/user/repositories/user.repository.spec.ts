@@ -19,9 +19,6 @@ describe('UserRepository', () => {
     }).compile();
 
     repository = moduleRef.get<UserRepository>(UserRepository);
-  });
-
-  beforeEach(() => {
     jest.clearAllMocks();
   });
 

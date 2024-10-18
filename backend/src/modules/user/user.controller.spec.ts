@@ -31,9 +31,6 @@ describe('UserController', () => {
 
     controller = moduleRef.get<UserController>(UserController);
     userService = moduleRef.get<UserService>(UserService);
-  });
-
-  beforeEach(() => {
     jest.clearAllMocks();
   });
 

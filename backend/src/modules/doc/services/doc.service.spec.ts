@@ -50,9 +50,6 @@ describe('DocService', () => {
     docRepository = moduleRef.get<DocRepository>(DocRepository);
     docVersionRepository =
       moduleRef.get<DocVersionRepository>(DocVersionRepository);
-  });
-
-  beforeEach(() => {
     jest.clearAllMocks();
   });
 

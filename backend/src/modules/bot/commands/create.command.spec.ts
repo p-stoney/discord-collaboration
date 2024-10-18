@@ -21,9 +21,6 @@ describe('CreateCommand', () => {
   beforeEach(() => {
     docService = mockDocService as unknown as DocService;
     command = new CreateCommand(docService);
-  });
-
-  beforeEach(() => {
     jest.clearAllMocks();
   });
 

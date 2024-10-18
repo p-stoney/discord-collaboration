@@ -4,29 +4,29 @@ import {
   SubscribeMessage,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  MessageBody,
+  ConnectedSocket,
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import { UseFilters, UseGuards } from '@nestjs/common';
 import { DocService } from '../doc/services/doc.service';
-import { PermissionsService } from '../doc/services/permissions.service';
-import { DocumentStateService } from '../doc/services/document-state.service';
 import { EventExceptionFilter } from './filters/event-exception.filter';
-import { UserDocument } from '../user/schemas/user.schema';
-import { WsGetUser } from '../user/decorators/user.decorator';
-import { AuthenticatedGuard } from '../auth/guards';
-import { PermissionGuard } from '../doc/guards';
 import {
   RequireReadPermission,
   RequireWritePermission,
 } from '../doc/decorators/permission.decorator';
-
-// SearchStringTroubleshoot.
-// This is a major WIP. Basic implementation to develop given more time.
+import { WsAuthenticatedGuard } from '../auth/guards/authenticated.guard';
+import { WsPermissionGuard } from '../doc/guards/permission.guard';
+import { AuthenticatedSocket } from '../auth/interfaces/extended-request';
+import { DocumentStateService } from '../doc/services/document-state.service';
 
 @UseFilters(EventExceptionFilter)
+@UseGuards(WsAuthenticatedGuard, WsPermissionGuard)
 @WebSocketGateway({
+  path: '/socket.io',
   cors: {
     origin: '*',
+    credentials: true,
   },
 })
 export class EventGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -35,12 +35,13 @@ export class EventGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   constructor(
     private readonly docService: DocService,
-    private readonly permissionsService: PermissionsService,
     private readonly documentStateService: DocumentStateService
   ) {}
 
-  async handleConnection(client: Socket) {
-    const user = client.data.user as UserDocument;
+  async handleConnection(client: AuthenticatedSocket) {
+    console.log('handleConnection triggered');
+
+    const user = client.handshake.user;
 
     if (!user) {
       console.log('User unauthorized, disconnecting');
@@ -51,70 +52,61 @@ export class EventGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log(`User ${user.discordId} connected.`);
   }
 
-  async handleDisconnect(client: Socket) {
-    const user = client.data.user as UserDocument;
+  async handleDisconnect(client: AuthenticatedSocket) {
+    const user = client.handshake.user;
     console.log(`User ${user?.discordId} disconnected.`);
   }
 
   @SubscribeMessage('joinDocument')
-  @UseGuards(AuthenticatedGuard, PermissionGuard)
   @RequireReadPermission()
   async handleJoinDocument(
-    @WsGetUser() user: UserDocument,
-    client: Socket,
-    docId: string
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() data: { docId: string }
   ) {
-    await this.docService.findByDocId(docId);
-    client.join(docId);
-    client.emit('joinedDocument', {
-      message: 'Successfully joined document room.',
-    });
-  }
+    try {
+      const docId = data.docId;
+      client.join(docId);
 
-  @SubscribeMessage('leaveDocument')
-  @UseGuards(AuthenticatedGuard)
-  async handleLeaveDocument(
-    @WsGetUser() user: UserDocument,
-    client: Socket,
-    docId: string
-  ) {
-    const permission = await this.permissionsService.findPermission(
-      docId,
-      user.discordId
-    );
+      let content = await this.documentStateService.getDocumentState(docId);
 
-    if (permission === 'WRITE' || permission === 'ADMIN') {
-      this.documentStateService.saveDocumentState(docId);
-    }
+      if (!content) {
+        const document = await this.docService.findByDocId(docId);
+        content = document?.content || '';
+        await this.documentStateService.updateDocumentState(docId, content);
+      }
 
-    client.leave(docId);
-
-    client.emit('leftDocument', {
-      message: 'Successfully left document room.',
-    });
-
-    this.server.to(docId).emit('userLeft', {
-      discordId: user.discordId,
-      message: 'User left the document.',
-    });
-
-    const remainingClients = this.server.sockets.adapter.rooms.get(docId);
-    if (!remainingClients || remainingClients.size === 0) {
-      this.documentStateService.cleanUpCache();
+      client.emit('joinedDocument', {
+        message: 'Successfully joined document room.',
+        content,
+      });
+    } catch (error) {
+      client.emit('error', {
+        message: 'An error occurred while joining the document.',
+      });
+      console.error('Error in handleJoinDocument:', error);
     }
   }
 
   @SubscribeMessage('updateDocument')
-  @UseGuards(AuthenticatedGuard, PermissionGuard)
   @RequireWritePermission()
   async handleUpdateDocument(
-    @WsGetUser() user: UserDocument,
-    client: Socket,
-    docId: string,
-    content: string
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() data: { docId: string; content: string }
   ) {
-    await this.docService.findByDocId(docId);
-    this.documentStateService.updateDocumentState(docId, content);
-    this.server.to(docId).emit('documentUpdated', { docId, content });
+    try {
+      const { docId, content } = data;
+      console.log('Received updateDocument event:', { docId, content });
+
+      await this.documentStateService.updateDocumentState(docId, content);
+
+      client.to(docId).emit('documentUpdated', { content });
+
+      this.documentStateService.saveToDatabase(docId);
+    } catch (error) {
+      client.emit('error', {
+        message: 'An error occurred while updating the document.',
+      });
+      console.error('Error in handleUpdateDocument:', error);
+    }
   }
 }

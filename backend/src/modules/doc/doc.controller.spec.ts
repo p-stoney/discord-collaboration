@@ -40,9 +40,6 @@ describe('DocController', () => {
 
     controller = moduleRef.get<DocController>(DocController);
     docService = moduleRef.get<DocService>(DocService);
-  });
-
-  beforeEach(() => {
     jest.clearAllMocks();
   });
 

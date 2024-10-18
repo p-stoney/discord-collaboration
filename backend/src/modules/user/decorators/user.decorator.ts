@@ -1,6 +1,8 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { Socket } from 'socket.io';
-import { AuthenticatedRequest } from '../../auth/interfaces/authenticated-request.interface';
+import {
+  AuthenticatedRequest,
+  AuthenticatedSocket,
+} from '../../auth/interfaces/extended-request';
 
 export const User = createParamDecorator(
   (data: string, ctx: ExecutionContext) => {
@@ -12,8 +14,8 @@ export const User = createParamDecorator(
 
 export const WsGetUser = createParamDecorator(
   (data: string, ctx: ExecutionContext) => {
-    const client = ctx.switchToWs().getClient<Socket>();
-    const user = client.data.user;
+    const client = ctx.switchToWs().getClient<AuthenticatedSocket>();
+    const user = client.handshake.user;
     return data ? user?.[data] : user;
   }
 );

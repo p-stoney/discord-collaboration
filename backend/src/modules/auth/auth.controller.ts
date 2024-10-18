@@ -8,7 +8,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { AuthenticatedRequest } from './interfaces/authenticated-request.interface';
+import { AuthenticatedRequest } from './interfaces/extended-request';
 import { AuthenticatedGuard } from './guards';
 import { DiscordAuthGuard } from './guards';
 import { ThrottlerGuard } from '@nestjs/throttler';

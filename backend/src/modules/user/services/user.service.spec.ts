@@ -22,9 +22,6 @@ describe('UserService', () => {
 
     service = moduleRef.get<UserService>(UserService);
     repository = moduleRef.get<UserRepository>(UserRepository);
-  });
-
-  beforeEach(() => {
     jest.clearAllMocks();
   });
 

@@ -22,9 +22,6 @@ describe('DocRepository', () => {
 
     repository = moduleRef.get<DocRepository>(DocRepository);
     model = moduleRef.get<Model<DocDocument>>(getModelToken(Doc.name));
-  });
-
-  beforeEach(() => {
     jest.clearAllMocks();
   });
 
