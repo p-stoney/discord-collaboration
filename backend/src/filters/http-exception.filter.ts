@@ -12,8 +12,16 @@ interface HttpErrorResponse extends HttpException {
   errors: { message: string }[];
 }
 
+/**
+ * Exception filter that formats HTTP exceptions into a standard JSON response.
+ */
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
+  /**
+   * Catches `HttpException` and sends a formatted JSON response.
+   * @param exception - The caught `HttpException`.
+   * @param host - The current execution context.
+   */
   catch(exception: HttpErrorResponse, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();

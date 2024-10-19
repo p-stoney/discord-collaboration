@@ -15,6 +15,12 @@ export class DocService {
     private readonly repository: DocRepository,
     private readonly versionRepository: DocVersionRepository
   ) {}
+  /**
+   * Finds a document by its ID.
+   * @param docId - The unique identifier of the document.
+   * @returns The document if found.
+   * @throws NotFoundException if the document does not exist.
+   */
   async findByDocId(docId: string): Promise<DocDocument> {
     const doc = await this.repository.findByDocId(docId);
     if (!doc) {
@@ -23,6 +29,12 @@ export class DocService {
     return doc;
   }
 
+  /**
+   * Retrieves all documents owned by a specific user.
+   * @param ownerId - The Discord ID of the owner.
+   * @returns An array of documents.
+   * @throws NotFoundException if no documents are found.
+   */
   async findAllByOwner(ownerId: string): Promise<DocDocument[]> {
     const docs = await this.repository.findAllByOwner(ownerId);
     if (!docs || docs.length === 0) {
@@ -31,6 +43,12 @@ export class DocService {
     return docs;
   }
 
+  /**
+   * Retrieves all documents where the user is a collaborator.
+   * @param discordId - The Discord ID of the user.
+   * @returns An array of documents.
+   * @throws NotFoundException if no documents are found.
+   */
   async findAllByCollaborator(discordId: string): Promise<DocDocument[]> {
     const docs = await this.repository.findAllByCollaborator(discordId);
     if (!docs || docs.length === 0) {
@@ -41,6 +59,11 @@ export class DocService {
     return docs;
   }
 
+  /**
+   * Creates a new document.
+   * @param createDocDto - The data transfer object containing document details.
+   * @returns The created document.
+   */
   async create(createDocDto: CreateDocDto): Promise<DocDocument> {
     const newDocData = {
       ...createDocDto,
@@ -65,6 +88,12 @@ export class DocService {
     return createdDoc;
   }
 
+  /**
+   * Updates an existing document and creates a new version.
+   * @param updateDocDto - The data transfer object containing updated details.
+   * @returns The updated document.
+   * @throws NotFoundException if the document does not exist.
+   */
   async update(updateDocDto: UpdateDocDto): Promise<DocDocument> {
     const existingDoc = await this.findByDocId(updateDocDto.docId);
 
@@ -93,6 +122,12 @@ export class DocService {
     return updatedDoc;
   }
 
+  /**
+   * Adds or updates collaborators on a document.
+   * @param addCollaboratorsDto - The data transfer object containing collaborator details.
+   * @returns The updated document.
+   * @throws NotFoundException if the document does not exist.
+   */
   async addCollaborators(
     addCollaboratorsDto: AddCollaboratorsDto
   ): Promise<DocDocument> {

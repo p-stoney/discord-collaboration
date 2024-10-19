@@ -8,8 +8,16 @@ import { UserDocument } from '../../user/schemas/user.schema';
 import { encrypt } from '../../../utils/encrypt';
 import { AuthUserDto } from '../../user/dtos';
 
+/**
+ * Discord authentication strategy using Passport.js.
+ */
 @Injectable()
 export class DiscordStrategy extends PassportStrategy(Strategy, 'discord') {
+  /**
+   * Initializes the Discord strategy with client credentials and callback URL.
+   * @param configService - The configuration service to access environment variables.
+   * @param authService - The authentication service for user validation.
+   */
   constructor(
     private readonly configService: ConfigService,
     private readonly authService: AuthService
@@ -23,12 +31,26 @@ export class DiscordStrategy extends PassportStrategy(Strategy, 'discord') {
     });
   }
 
+  /**
+   * Overrides the `authenticate` method to include the state parameter in the OAuth flow.
+   * @param req - The current request.
+   * @param options - Optional parameters.
+   */
   authenticate(req: Request, options?: any) {
     options = options || {};
     options.state = req.session.state;
     super.authenticate(req, options);
   }
 
+  /**
+   * Validates the user by checking the Discord profile and tokens.
+   * @param req - The current request.
+   * @param accessToken - The access token from Discord.
+   * @param refreshToken - The refresh token from Discord.
+   * @param profile - The user's Discord profile.
+   * @returns The validated user document.
+   * @throws `UnauthorizedException` if validation fails.
+   */
   async validate(
     req: Request,
     accessToken: string,

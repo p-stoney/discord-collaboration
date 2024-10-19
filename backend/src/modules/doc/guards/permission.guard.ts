@@ -13,6 +13,9 @@ import {
   AuthenticatedSocket,
 } from '../../auth/interfaces/authenticated.interface';
 
+/**
+ * Guard that checks if the user has the required permission for a document in HTTP requests.
+ */
 @Injectable()
 export class PermissionGuard implements CanActivate {
   constructor(
@@ -20,6 +23,11 @@ export class PermissionGuard implements CanActivate {
     private readonly permissionsService: PermissionsService
   ) {}
 
+  /**
+   * Determines if the user has the required document permission.
+   * @param context - The current execution context.
+   * @returns `true` if the user has permission, otherwise throws a `ForbiddenException`.
+   */
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const requiredPermission = this.reflector.get<DocumentPermission>(
       PERMISSION_KEY,
@@ -50,6 +58,9 @@ export class PermissionGuard implements CanActivate {
   }
 }
 
+/**
+ * Guard that checks if the user has the required permission for a document in WebSocket events.
+ */
 @Injectable()
 export class WsPermissionGuard implements CanActivate {
   constructor(
@@ -57,6 +68,11 @@ export class WsPermissionGuard implements CanActivate {
     private readonly permissionsService: PermissionsService
   ) {}
 
+  /**
+   * Determines if the WebSocket client has the required document permission.
+   * @param context - The current execution context.
+   * @returns `true` if the user has permission, otherwise throws a `ForbiddenException`.
+   */
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const requiredPermission = this.reflector.get<DocumentPermission>(
       PERMISSION_KEY,
