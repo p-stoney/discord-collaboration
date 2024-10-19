@@ -10,11 +10,20 @@ import { AuthExceptionFilter, HttpExceptionFilter } from './filters';
 import { SocketIoAdapter } from './adapters/socket-io.adapter';
 import RedisStore from 'connect-redis';
 import { createClient } from 'redis';
+import { RedisClientType } from 'redis';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    snapshot: true,
-  });
+  let app: NestExpressApplication;
+
+  try {
+    app = await NestFactory.create<NestExpressApplication>(AppModule, {
+      snapshot: true,
+    });
+    console.log('Nest application created successfully.');
+  } catch (error) {
+    console.error('Error creating Nest application:', error.message);
+    process.exit(1);
+  }
 
   const configService = app.get(ConfigService);
 
@@ -26,8 +35,16 @@ async function bootstrap() {
     credentials: true,
   });
 
-  const redisClient = createClient({ url: 'redis://localhost:6379' });
-  await redisClient.connect();
+  let redisClient: RedisClientType;
+
+  try {
+    redisClient = createClient({ url: 'redis://localhost:6379' });
+    await redisClient.connect();
+    console.log('Connected to Redis successfully.');
+  } catch (error) {
+    console.error('Error connecting to Redis:', error.message);
+    process.exit(1);
+  }
 
   const sessionMiddleware = session({
     store: new RedisStore({ client: redisClient }),
@@ -43,7 +60,6 @@ async function bootstrap() {
   });
 
   app.use(sessionMiddleware);
-
   app.use(passport.initialize());
   app.use(passport.session());
 
@@ -58,13 +74,42 @@ async function bootstrap() {
     })
   );
 
-  const redisIoAdapter = new SocketIoAdapter(app, sessionMiddleware);
-  await redisIoAdapter.connectToRedis();
+  let redisIoAdapter: SocketIoAdapter;
+
+  try {
+    redisIoAdapter = new SocketIoAdapter(app, sessionMiddleware);
+    await redisIoAdapter.connectToRedis();
+    app.useWebSocketAdapter(redisIoAdapter);
+    console.log('WebSocket adapter connected to Redis successfully.');
+  } catch (error) {
+    console.error(
+      'Error connecting WebSocket adapter to Redis:',
+      error.message
+    );
+    process.exit(1);
+  }
 
   app.useWebSocketAdapter(redisIoAdapter);
 
-  await app.listen(port);
-  console.log(`Application is running on: http://localhost:${port}`);
+  try {
+    await app.listen(port);
+    console.log(`Application is running on: http://localhost:${port}`);
+  } catch (error) {
+    console.error('Error starting the application:', error.message);
+    process.exit(1);
+  }
 }
 
-bootstrap();
+async function start() {
+  try {
+    await bootstrap();
+  } catch (error) {
+    console.error(
+      'Unexpected error during application bootstrap:',
+      error.message
+    );
+    process.exit(1);
+  }
+}
+
+start();

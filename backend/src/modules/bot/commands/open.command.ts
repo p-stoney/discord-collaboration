@@ -58,12 +58,6 @@ export class OpenCommand {
         );
       }
 
-      const document = await this.docService.findByDocId(docId);
-
-      if (!document) {
-        throw new ForbiddenException(`Document with ID "${docId}" not found.`);
-      }
-
       const baseUrl = this.configService.get<string>('auth.appBaseUrl');
       const documentLink = `${baseUrl}/document/${docId}`;
 

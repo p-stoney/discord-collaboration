@@ -8,6 +8,7 @@ import {
   UpdateDocDto,
   AddCollaboratorsDto,
 } from '../dtos';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class DocService {
@@ -67,7 +68,7 @@ export class DocService {
   async create(createDocDto: CreateDocDto): Promise<DocDocument> {
     const newDocData = {
       ...createDocDto,
-      docId: `${createDocDto.ownerId}-${Date.now()}`,
+      docId: uuidv4(),
       content: createDocDto.content || '',
       revision: 1,
       collaborators: [
@@ -92,16 +93,9 @@ export class DocService {
    * Updates an existing document and creates a new version.
    * @param updateDocDto - The data transfer object containing updated details.
    * @returns The updated document.
-   * @throws NotFoundException if the document does not exist.
    */
   async update(updateDocDto: UpdateDocDto): Promise<DocDocument> {
     const existingDoc = await this.findByDocId(updateDocDto.docId);
-
-    if (!existingDoc) {
-      throw new NotFoundException(
-        `Document with ID ${updateDocDto.docId} not found`
-      );
-    }
 
     const updatedDocData = {
       ...existingDoc.toObject(),
@@ -126,18 +120,11 @@ export class DocService {
    * Adds or updates collaborators on a document.
    * @param addCollaboratorsDto - The data transfer object containing collaborator details.
    * @returns The updated document.
-   * @throws NotFoundException if the document does not exist.
    */
   async addCollaborators(
     addCollaboratorsDto: AddCollaboratorsDto
   ): Promise<DocDocument> {
     const existingDoc = await this.findByDocId(addCollaboratorsDto.docId);
-
-    if (!existingDoc) {
-      throw new NotFoundException(
-        `Document with ID ${addCollaboratorsDto.docId} not found`
-      );
-    }
 
     const updatedCollaborators: CollaboratorDto[] =
       existingDoc.collaborators.map((collaborator) => {

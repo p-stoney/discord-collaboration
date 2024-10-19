@@ -1,5 +1,10 @@
 import { Command, Handler, IA } from '@discord-nestjs/core';
-import { Injectable, UseFilters, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  UseFilters,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CommandExceptionFilter } from '../filters/command-exception.filter';
 import {
   CommandInteraction,
@@ -62,10 +67,6 @@ export class DownloadCommand {
 
       const document = await this.docService.findByDocId(docId);
 
-      if (!document) {
-        throw new ForbiddenException(`Document with ID "${docId}" not found.`);
-      }
-
       const fileName = `${document.title}.txt`;
       const fileBuffer = Buffer.from(document.content, 'utf-8');
       const attachment = new AttachmentBuilder(fileBuffer, { name: fileName });
@@ -77,6 +78,11 @@ export class DownloadCommand {
       });
     } catch (error) {
       if (error instanceof ForbiddenException) {
+        await interaction.followUp({
+          content: error.message,
+          ephemeral: true,
+        });
+      } else if (error instanceof NotFoundException) {
         await interaction.followUp({
           content: error.message,
           ephemeral: true,

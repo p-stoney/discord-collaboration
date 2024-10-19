@@ -48,18 +48,26 @@ export class DocumentStateService {
    * Debounced to batch save operations.
    * @param docId - The unique identifier of the document.
    */
-  saveToDatabase(docId: string) {
+  async saveToDatabase(docId: string): Promise<void> {
     console.log('Saving document to database:', docId);
     const client = this.redisService.getClient();
-    return client.get(`document:${docId}`).then((content) => {
+
+    try {
+      const content = await client.get(`document:${docId}`);
+
       if (content) {
-        return this.docService.update({
+        await this.docService.update({
           docId,
           updatedDetails: { content },
         });
       } else {
         console.log('No content found in Redis for docId:', docId);
       }
-    });
+    } catch (error) {
+      console.error(
+        `Failed to save document with docId: ${docId} to database`,
+        error
+      );
+    }
   }
 }

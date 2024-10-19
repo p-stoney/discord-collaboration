@@ -1,9 +1,16 @@
 import { Command, Handler, IA } from '@discord-nestjs/core';
-import { Injectable, UseFilters, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  UseFilters,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CommandExceptionFilter } from '../filters/command-exception.filter';
 import { Message, TextChannel, CommandInteraction } from 'discord.js';
 import { DocService, PermissionsService } from '../../doc/services';
 import { DocumentPermission } from '../../doc/enums/doc-permission.enum';
+
+// Revisit: try/catch errors at bottom. Custom error with umbrella feedback.
 
 @Command({
   name: 'share',
@@ -38,6 +45,8 @@ export class ShareCommand {
     try {
       const { response: docIdResponse, content: docId } =
         await this.collectResponse(channel, userId);
+
+      // await this.docService.findByDocId(docIdResponse.content);
 
       await docIdResponse.delete();
 
@@ -126,6 +135,11 @@ export class ShareCommand {
       });
     } catch (error) {
       if (error instanceof ForbiddenException) {
+        await interaction.followUp({
+          content: error.message,
+          ephemeral: true,
+        });
+      } else if (error instanceof NotFoundException) {
         await interaction.followUp({
           content: error.message,
           ephemeral: true,
