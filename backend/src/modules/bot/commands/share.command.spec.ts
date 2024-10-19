@@ -1,6 +1,5 @@
 import { ShareCommand } from './share.command';
-import { DocService } from '../../doc/services/doc.service';
-import { PermissionsService } from '../../doc/services/permissions.service';
+import { DocService, PermissionsService } from '../../doc/services';
 import {
   CommandInteraction,
   User,

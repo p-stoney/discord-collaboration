@@ -3,7 +3,7 @@ import { DiscordAuthGuard } from './discord-auth.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { ExecutionContext } from '@nestjs/common';
 import { createMock } from '@golevelup/ts-jest';
-import { AuthenticatedRequest } from '../interfaces/authenticated-request.interface';
+import { AuthenticatedRequest } from '../interfaces/authenticated.interface';
 
 describe('DiscordAuthGuard', () => {
   let guard: DiscordAuthGuard;

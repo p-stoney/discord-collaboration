@@ -1,11 +1,14 @@
 import { Command, Handler, IA } from '@discord-nestjs/core';
 import { Injectable, UseFilters, ForbiddenException } from '@nestjs/common';
 import { CommandExceptionFilter } from '../filters/command-exception.filter';
-import { CommandInteraction, AttachmentBuilder } from 'discord.js';
-import { DocService } from '../../doc/services/doc.service';
-import { PermissionsService } from '../../doc/services/permissions.service';
+import {
+  CommandInteraction,
+  AttachmentBuilder,
+  Message,
+  TextChannel,
+} from 'discord.js';
+import { DocService, PermissionsService } from '../../doc/services';
 import { DocumentPermission } from '../../doc/enums/doc-permission.enum';
-import { Message, TextChannel } from 'discord.js';
 
 @Command({
   name: 'download',

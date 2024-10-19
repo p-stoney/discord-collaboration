@@ -2,7 +2,7 @@ import { Command, Handler } from '@discord-nestjs/core';
 import { Injectable, UseFilters } from '@nestjs/common';
 import { CommandExceptionFilter } from '../filters/command-exception.filter';
 import { CommandInteraction } from 'discord.js';
-import { DocService } from '../../doc/services/doc.service';
+import { DocService } from '../../doc/services';
 
 @Command({
   name: 'list',

@@ -6,7 +6,7 @@ import {
   PermissionsService,
 } from '../doc/services';
 import { Server } from 'socket.io';
-import { AuthenticatedSocket } from '../auth/interfaces/extended-request';
+import { AuthenticatedSocket } from '../auth/interfaces/authenticated.interface';
 
 describe('EventGateway', () => {
   let gateway: EventGateway;

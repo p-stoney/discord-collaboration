@@ -1,8 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Document } from 'mongoose';
 import { DocService } from './doc.service';
-import { DocRepository } from '../repositories/doc.repository';
-import { DocVersionRepository } from '../repositories/doc-version.repository';
+import { DocRepository, DocVersionRepository } from '../repositories';
 import { DocDocument } from '../schemas/doc.schema';
 import {
   CreateDocDto,

@@ -7,7 +7,7 @@ import passport from 'passport';
 import {
   AuthenticatedRequest,
   AuthenticatedSocket,
-} from '../modules/auth/interfaces/extended-request';
+} from '../modules/auth/interfaces/authenticated.interface';
 import cookieParser from 'cookie-parser';
 import { createAdapter } from '@socket.io/redis-adapter';
 import { createClient } from 'redis';

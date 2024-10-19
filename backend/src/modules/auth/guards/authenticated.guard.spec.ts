@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthenticatedGuard } from './authenticated.guard';
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { createMock } from '@golevelup/ts-jest';
-import { AuthenticatedRequest } from '../interfaces/authenticated-request.interface';
+import { AuthenticatedRequest } from '../interfaces/authenticated.interface';
 
 describe('AuthenticatedGuard', () => {
   let guard: AuthenticatedGuard;

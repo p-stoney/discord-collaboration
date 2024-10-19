@@ -10,9 +10,9 @@ import { BotModule } from './modules/bot/bot.module';
 import { DocModule } from './modules/doc/doc.module';
 import { EventModule } from './modules/event/event.module';
 import { UserModule } from './modules/user/user.module';
-import { validate, authConfig, botConfig, databaseConfig } from './config';
 import { RedisModule } from './redis/redis.module';
 import mongooseAutoPopulate from 'mongoose-autopopulate';
+import { validate, authConfig, botConfig, databaseConfig } from './config';
 
 @Module({
   imports: [

@@ -1,9 +1,8 @@
 import { Command, Handler, IA } from '@discord-nestjs/core';
 import { Injectable, UseFilters } from '@nestjs/common';
 import { CommandExceptionFilter } from '../filters/command-exception.filter';
-import { CommandInteraction } from 'discord.js';
-import { DocService } from '../../doc/services/doc.service';
-import { Message, TextChannel } from 'discord.js';
+import { CommandInteraction, Message, TextChannel } from 'discord.js';
+import { DocService } from '../../doc/services';
 
 @Command({
   name: 'create',

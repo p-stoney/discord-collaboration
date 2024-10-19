@@ -9,16 +9,15 @@ import {
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { UseFilters, UseGuards } from '@nestjs/common';
-import { DocService } from '../doc/services/doc.service';
+import { DocService, DocumentStateService } from '../doc/services';
 import { EventExceptionFilter } from './filters/event-exception.filter';
 import {
   RequireReadPermission,
   RequireWritePermission,
 } from '../doc/decorators/permission.decorator';
-import { WsAuthenticatedGuard } from '../auth/guards/authenticated.guard';
-import { WsPermissionGuard } from '../doc/guards/permission.guard';
-import { AuthenticatedSocket } from '../auth/interfaces/extended-request';
-import { DocumentStateService } from '../doc/services/document-state.service';
+import { WsAuthenticatedGuard } from '../auth/guards';
+import { WsPermissionGuard } from '../doc/guards';
+import { AuthenticatedSocket } from '../auth/interfaces/authenticated.interface';
 
 @UseFilters(EventExceptionFilter)
 @UseGuards(WsAuthenticatedGuard, WsPermissionGuard)

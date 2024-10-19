@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { DocRepository } from './repositories/doc.repository';
-import { DocVersionRepository } from './repositories/doc-version.repository';
-import { DocService } from './services/doc.service';
-import { DocumentStateService } from './services/document-state.service';
+import { DocRepository, DocVersionRepository } from './repositories';
+import {
+  DocService,
+  DocumentStateService,
+  PermissionsService,
+} from './services';
 import { Doc, DocSchema } from './schemas/doc.schema';
 import { DocVersion, DocVersionSchema } from './schemas/doc-version.schema';
-import { PermissionsService } from './services/permissions.service';
 import { DocController } from './doc.controller';
 import { RedisModule } from '../../redis/redis.module';
 import { RedisService } from '../../redis/redis.service';

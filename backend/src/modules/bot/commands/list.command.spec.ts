@@ -1,5 +1,5 @@
 import { ListCommand } from './list.command';
-import { DocService } from '../../doc/services/doc.service';
+import { DocService } from '../../doc/services';
 import { CommandInteraction, User } from 'discord.js';
 import { DocDto } from '../../doc/dtos/doc.dto';
 

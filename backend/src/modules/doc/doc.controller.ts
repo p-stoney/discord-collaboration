@@ -23,7 +23,7 @@ import {
   AddCollaboratorsDto,
 } from './dtos';
 import { UserDocument } from '../user/schemas/user.schema';
-import { AuthenticatedRequest } from '../auth/interfaces/extended-request';
+import { AuthenticatedRequest } from '../auth/interfaces/authenticated.interface';
 
 @Controller('documents')
 @UseGuards(AuthenticatedGuard, PermissionGuard)

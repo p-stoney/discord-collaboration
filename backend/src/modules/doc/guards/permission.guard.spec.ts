@@ -5,7 +5,7 @@ import { PermissionsService } from '../services/permissions.service';
 import { ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { DocumentPermission } from '../enums/doc-permission.enum';
 import { PERMISSION_KEY } from '../decorators/permission.decorator';
-import { AuthenticatedRequest } from '../../auth/interfaces/authenticated-request.interface';
+import { AuthenticatedRequest } from '../../auth/interfaces/authenticated.interface';
 import { createMock } from '@golevelup/ts-jest';
 
 describe('PermissionGuard', () => {

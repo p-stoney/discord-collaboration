@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { DocRepository } from '../repositories/doc.repository';
-import { DocVersionRepository } from '../repositories/doc-version.repository';
+import { DocRepository, DocVersionRepository } from '../repositories';
 import { DocDocument } from '../schemas/doc.schema';
 import { DocumentPermission } from '../enums/doc-permission.enum';
 import {

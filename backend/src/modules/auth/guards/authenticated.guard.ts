@@ -7,7 +7,7 @@ import {
 import {
   AuthenticatedRequest,
   AuthenticatedSocket,
-} from '../interfaces/extended-request';
+} from '../interfaces/authenticated.interface';
 
 @Injectable()
 export class AuthenticatedGuard implements CanActivate {

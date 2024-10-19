@@ -11,7 +11,7 @@ import { PERMISSION_KEY } from '../decorators/permission.decorator';
 import {
   AuthenticatedRequest,
   AuthenticatedSocket,
-} from '../../auth/interfaces/extended-request';
+} from '../../auth/interfaces/authenticated.interface';
 
 @Injectable()
 export class PermissionGuard implements CanActivate {

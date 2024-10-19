@@ -3,8 +3,7 @@ import { Injectable, UseFilters, ForbiddenException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CommandExceptionFilter } from '../filters/command-exception.filter';
 import { CommandInteraction, Message, TextChannel } from 'discord.js';
-import { DocService } from '../../doc/services/doc.service';
-import { PermissionsService } from '../../doc/services/permissions.service';
+import { DocService, PermissionsService } from '../../doc/services';
 import { DocumentPermission } from '../../doc/enums/doc-permission.enum';
 
 @Command({
