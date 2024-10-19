@@ -1,10 +1,8 @@
 import { Command, Handler, IA } from '@discord-nestjs/core';
 import { Injectable, UseFilters, ForbiddenException } from '@nestjs/common';
 import { CommandExceptionFilter } from '../filters/command-exception.filter';
-import { Message, TextChannel } from 'discord.js';
-import { CommandInteraction } from 'discord.js';
-import { DocService } from '../../doc/services/doc.service';
-import { PermissionsService } from '../../doc/services/permissions.service';
+import { Message, TextChannel, CommandInteraction } from 'discord.js';
+import { DocService, PermissionsService } from '../../doc/services';
 import { DocumentPermission } from '../../doc/enums/doc-permission.enum';
 
 @Command({
@@ -39,7 +37,7 @@ export class ShareCommand {
 
     try {
       const { response: docIdResponse, content: docId } =
-        await this.collectResponse(interaction, channel, userId);
+        await this.collectResponse(channel, userId);
 
       await docIdResponse.delete();
 
@@ -62,7 +60,7 @@ export class ShareCommand {
       });
 
       const { response: usersResponse, content: usersContent } =
-        await this.collectResponse(interaction, channel, userId);
+        await this.collectResponse(channel, userId);
 
       await usersResponse.delete();
 
@@ -87,7 +85,7 @@ export class ShareCommand {
       });
 
       const { response: permissionResponse, content: permissionContent } =
-        await this.collectResponse(interaction, channel, userId);
+        await this.collectResponse(channel, userId);
 
       await permissionResponse.delete();
 
@@ -149,22 +147,25 @@ export class ShareCommand {
   }
 
   private async collectResponse(
-    interaction: CommandInteraction,
     channel: TextChannel,
     userId: string
   ): Promise<{ response: Message; content: string }> {
     const filter = (response: Message) => response.author.id === userId;
 
-    const collected = await channel.awaitMessages({
-      filter,
-      max: 1,
-      time: 30000,
-      errors: ['time'],
-    });
+    try {
+      const collected = await channel.awaitMessages({
+        filter,
+        max: 1,
+        time: 30000,
+        errors: ['time'],
+      });
 
-    const response = collected.first();
-    const content = response?.content.trim() || '';
+      const response = collected.first();
+      const content = response?.content.trim() || '';
 
-    return { response, content };
+      return { response, content };
+    } catch (error) {
+      throw new Error('time');
+    }
   }
 }

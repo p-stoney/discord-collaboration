@@ -1,4 +1,4 @@
-import { Command, Handler, InteractionEvent } from '@discord-nestjs/core';
+import { Command, Handler, IA } from '@discord-nestjs/core';
 import { Injectable, UseFilters } from '@nestjs/common';
 import { CommandExceptionFilter } from '../filters/command-exception.filter';
 import { CommandInteraction } from 'discord.js';
@@ -15,9 +15,7 @@ export class CreateCommand {
   constructor(private readonly docService: DocService) {}
 
   @Handler()
-  async onCreate(
-    @InteractionEvent() interaction: CommandInteraction
-  ): Promise<void> {
+  async onCreate(@IA() interaction: CommandInteraction): Promise<void> {
     const userId = interaction.user.id;
 
     await interaction.reply({
@@ -37,39 +35,44 @@ export class CreateCommand {
       return;
     }
 
-    channel
-      .awaitMessages({ filter, max: 1, time: 30000, errors: ['time'] })
-      .then(async (collected) => {
-        const response = collected.first();
-        const title = response?.content;
-
-        if (!title) {
-          await interaction.followUp({
-            content: 'No title was provided.',
-            ephemeral: true,
-          });
-          return;
-        }
-
-        await this.docService.create({
-          ownerId: userId,
-          title,
-          content: '',
-        });
-
-        await interaction.followUp({
-          content: `Document "${title}" created successfully.`,
-          ephemeral: true,
-        });
-
-        await response.delete();
-      })
-      .catch(async () => {
-        await interaction.followUp({
-          content:
-            'You did not provide a title in time (30 seconds). Please try again.',
-          ephemeral: true,
-        });
+    try {
+      const collected = await channel.awaitMessages({
+        filter,
+        max: 1,
+        time: 30000,
+        errors: ['time'],
       });
+
+      const response = collected.first();
+      const title = response?.content;
+
+      if (!title) {
+        await interaction.followUp({
+          content: 'No title was provided.',
+          ephemeral: true,
+        });
+        await response?.delete();
+        return;
+      }
+
+      await this.docService.create({
+        ownerId: userId,
+        title,
+        content: '',
+      });
+
+      await interaction.followUp({
+        content: `Document "${title}" created successfully.`,
+        ephemeral: true,
+      });
+
+      await response.delete();
+    } catch (error) {
+      await interaction.followUp({
+        content:
+          'You did not provide a title in time (30 seconds). Please try again.',
+        ephemeral: true,
+      });
+    }
   }
 }

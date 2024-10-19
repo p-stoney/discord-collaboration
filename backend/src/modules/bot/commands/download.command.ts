@@ -39,7 +39,6 @@ export class DownloadCommand {
 
     try {
       const { response, content: docId } = await this.collectResponse(
-        interaction,
         channel,
         userId
       );
@@ -96,22 +95,25 @@ export class DownloadCommand {
   }
 
   private async collectResponse(
-    interaction: CommandInteraction,
     channel: TextChannel,
     userId: string
   ): Promise<{ response: Message; content: string }> {
     const filter = (response: Message) => response.author.id === userId;
 
-    const collected = await channel.awaitMessages({
-      filter,
-      max: 1,
-      time: 30000,
-      errors: ['time'],
-    });
+    try {
+      const collected = await channel.awaitMessages({
+        filter,
+        max: 1,
+        time: 30000,
+        errors: ['time'],
+      });
 
-    const response = collected.first();
-    const content = response?.content.trim() || '';
+      const response = collected.first();
+      const content = response?.content.trim() || '';
 
-    return { response, content };
+      return { response, content };
+    } catch (error) {
+      throw new Error('time');
+    }
   }
 }

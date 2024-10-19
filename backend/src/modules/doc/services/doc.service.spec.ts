@@ -140,10 +140,17 @@ describe('DocService', () => {
 
   describe('create', () => {
     it('should create a new document and its initial version', async () => {
+      const collaboratorDto: CollaboratorDto[] = [
+        {
+          discordId: '11111111111111111',
+          permission: DocumentPermission.ADMIN,
+        },
+      ];
       const createDocDto: CreateDocDto = {
         ownerId: '11111111111111111',
         title: 'New Document',
         content: '',
+        collaborators: collaboratorDto,
       };
 
       const newDocData = {
@@ -151,11 +158,11 @@ describe('DocService', () => {
         docId: `${createDocDto.ownerId}-${Date.now()}`,
         content: '',
         revision: 1,
+        collaborators: collaboratorDto,
       };
 
       const createdDoc: DocDocument = {
         ...newDocData,
-        collaborators: [],
       } as DocDocument;
 
       const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(1609459200000);

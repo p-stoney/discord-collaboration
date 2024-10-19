@@ -1,12 +1,16 @@
 import { ShareCommand } from './share.command';
 import { DocService } from '../../doc/services/doc.service';
 import { PermissionsService } from '../../doc/services/permissions.service';
-import { CommandInteraction, User, Client } from 'discord.js';
-import { ShareDocumentDto } from './dtos/share-document.dto';
+import {
+  CommandInteraction,
+  User,
+  Client,
+  TextChannel,
+  Message,
+} from 'discord.js';
 import { DocumentPermission } from '../../doc/enums/doc-permission.enum';
-import { ForbiddenException } from '@nestjs/common';
 
-describe('ShareDocumentCommand', () => {
+describe('ShareCommand', () => {
   let command: ShareCommand;
   let docService: DocService;
   let permissionsService: PermissionsService;
@@ -19,16 +23,26 @@ describe('ShareDocumentCommand', () => {
     hasPermission: jest.fn(),
   };
 
+  const mockUser = {
+    id: '123456789012345678',
+  } as User;
+
+  const mockClient = {
+    users: {
+      fetch: jest.fn(),
+    },
+  } as unknown as Client;
+
+  const mockChannel = {
+    awaitMessages: jest.fn(),
+  } as unknown as TextChannel;
+
   const mockInteraction = {
-    user: {
-      id: '123456789012345678',
-    } as User,
-    client: {
-      users: {
-        fetch: jest.fn(),
-      },
-    } as unknown as Client,
+    user: mockUser,
+    client: mockClient,
     reply: jest.fn(),
+    followUp: jest.fn(),
+    channel: mockChannel,
   } as unknown as CommandInteraction;
 
   beforeEach(() => {
@@ -43,17 +57,41 @@ describe('ShareDocumentCommand', () => {
     expect(command).toBeDefined();
   });
 
-  describe('onShareDocument', () => {
+  describe('onShare', () => {
     it('should share a document with users and send confirmation', async () => {
-      const discordId = mockInteraction.user.id;
-      const dto: ShareDocumentDto = {
-        docId: 'doc123',
-        users: ['111111111111111111', '222222222222222222'],
-        permission: DocumentPermission.WRITE,
-      };
+      const userId = mockInteraction.user.id;
+      const docId = 'doc123';
+      const userMentions = '<@111111111111111111> <@222222222222222222>';
+      const users = ['111111111111111111', '222222222222222222'];
+      const permissionContent = 'WRITE';
 
-      mockPermissionsService.hasPermission.mockResolvedValueOnce(true);
-      mockDocService.addCollaborators.mockResolvedValueOnce(null);
+      const mockDocIdResponse = {
+        content: docId,
+        author: { id: userId },
+        delete: jest.fn(),
+      } as unknown as Message;
+
+      const mockUsersResponse = {
+        content: userMentions,
+        author: { id: userId },
+        delete: jest.fn(),
+      } as unknown as Message;
+
+      const mockPermissionResponse = {
+        content: permissionContent,
+        author: { id: userId },
+        delete: jest.fn(),
+      } as unknown as Message;
+
+      (mockChannel.awaitMessages as jest.Mock)
+        .mockResolvedValueOnce({ first: () => mockDocIdResponse })
+        .mockResolvedValueOnce({ first: () => mockUsersResponse })
+        .mockResolvedValueOnce({ first: () => mockPermissionResponse });
+
+      (permissionsService.hasPermission as jest.Mock).mockResolvedValueOnce(
+        true
+      );
+      (docService.addCollaborators as jest.Mock).mockResolvedValueOnce(null);
 
       const mockFetchedUser1 = {
         send: jest.fn().mockResolvedValueOnce(null),
@@ -62,128 +100,183 @@ describe('ShareDocumentCommand', () => {
         send: jest.fn().mockResolvedValueOnce(null),
       };
 
-      (mockInteraction.client.users.fetch as jest.Mock)
+      (mockClient.users.fetch as jest.Mock)
         .mockResolvedValueOnce(mockFetchedUser1)
         .mockResolvedValueOnce(mockFetchedUser2);
 
-      await command.onShareDocument(dto, mockInteraction);
+      await command.onShare(mockInteraction);
+
+      expect(mockInteraction.followUp).toHaveBeenCalledWith({
+        content: `Document "${docId}" shared successfully with users: ${users.join(
+          ', '
+        )}.`,
+        ephemeral: true,
+      });
+
+      expect(mockDocIdResponse.delete).toHaveBeenCalled();
+      expect(mockUsersResponse.delete).toHaveBeenCalled();
+      expect(mockPermissionResponse.delete).toHaveBeenCalled();
 
       expect(permissionsService.hasPermission).toHaveBeenCalledWith(
-        dto.docId,
-        discordId,
+        docId,
+        userId,
         DocumentPermission.ADMIN
       );
 
       expect(docService.addCollaborators).toHaveBeenCalledWith({
-        docId: dto.docId,
-        users: dto.users,
-        permission: dto.permission,
+        docId: docId,
+        users: users,
+        permission: 'WRITE',
       });
 
-      expect(mockInteraction.client.users.fetch).toHaveBeenCalledTimes(2);
-      expect(mockInteraction.client.users.fetch).toHaveBeenCalledWith(
-        dto.users[0]
-      );
-      expect(mockInteraction.client.users.fetch).toHaveBeenCalledWith(
-        dto.users[1]
-      );
+      expect(mockClient.users.fetch).toHaveBeenCalledTimes(2);
+      expect(mockClient.users.fetch).toHaveBeenCalledWith(users[0]);
+      expect(mockClient.users.fetch).toHaveBeenCalledWith(users[1]);
 
       expect(mockFetchedUser1.send).toHaveBeenCalledWith(
-        `You have been granted ${dto.permission} access to document "${dto.docId}".`
+        `You have been granted WRITE access to document "${docId}".`
       );
       expect(mockFetchedUser2.send).toHaveBeenCalledWith(
-        `You have been granted ${dto.permission} access to document "${dto.docId}".`
+        `You have been granted WRITE access to document "${docId}".`
       );
-
-      expect(mockInteraction.reply).toHaveBeenCalledWith({
-        content: `Document "${dto.docId}" shared successfully with users: ${dto.users.join(
-          ', '
-        )}.`,
-        ephemeral: true,
-      });
     });
 
-    it('should handle errors when sending DM fails', async () => {
-      const discordId = mockInteraction.user.id;
-      const dto: ShareDocumentDto = {
-        docId: 'doc123',
-        users: ['111111111111111111'],
-        permission: DocumentPermission.READ,
-      };
+    it('should handle invalid permission level', async () => {
+      const userId = mockInteraction.user.id;
+      const docId = 'doc123';
+      const userMentions = '<@111111111111111111>';
+      const permissionContent = 'INVALID';
 
-      mockPermissionsService.hasPermission.mockResolvedValueOnce(true);
-      mockDocService.addCollaborators.mockResolvedValueOnce(null);
+      const mockDocIdResponse = {
+        content: docId,
+        author: { id: userId },
+        delete: jest.fn(),
+      } as unknown as Message;
 
-      const mockFetchedUser = {
-        send: jest.fn().mockRejectedValueOnce(new Error('DM Failed')),
-      };
+      const mockUsersResponse = {
+        content: userMentions,
+        author: { id: userId },
+        delete: jest.fn(),
+      } as unknown as Message;
 
-      (mockInteraction.client.users.fetch as jest.Mock).mockResolvedValueOnce(
-        mockFetchedUser
+      const mockPermissionResponse = {
+        content: permissionContent,
+        author: { id: userId },
+        delete: jest.fn(),
+      } as unknown as Message;
+
+      (mockChannel.awaitMessages as jest.Mock)
+        .mockResolvedValueOnce({ first: () => mockDocIdResponse })
+        .mockResolvedValueOnce({ first: () => mockUsersResponse })
+        .mockResolvedValueOnce({ first: () => mockPermissionResponse });
+
+      (permissionsService.hasPermission as jest.Mock).mockResolvedValueOnce(
+        true
       );
 
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      await command.onShare(mockInteraction);
 
-      await command.onShareDocument(dto, mockInteraction);
-
-      expect(permissionsService.hasPermission).toHaveBeenCalledWith(
-        dto.docId,
-        discordId,
-        DocumentPermission.ADMIN
-      );
-
-      expect(docService.addCollaborators).toHaveBeenCalledWith({
-        docId: dto.docId,
-        users: dto.users,
-        permission: dto.permission,
-      });
-
-      expect(mockInteraction.client.users.fetch).toHaveBeenCalledWith(
-        dto.users[0]
-      );
-
-      expect(mockFetchedUser.send).toHaveBeenCalledWith(
-        `You have been granted ${dto.permission} access to document "${dto.docId}".`
-      );
-
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        `Could not send DM to user ${dto.users[0]}:`,
-        expect.any(Error)
-      );
-
-      expect(mockInteraction.reply).toHaveBeenCalledWith({
-        content: `Document "${dto.docId}" shared successfully with users: ${dto.users.join(
-          ', '
-        )}.`,
+      expect(mockInteraction.followUp).toHaveBeenCalledWith({
+        content:
+          'Invalid permission level provided. Please try the command again.',
         ephemeral: true,
       });
-
-      consoleErrorSpy.mockRestore();
-    });
-
-    it('should throw an error if user lacks ADMIN permission', async () => {
-      const discordId = mockInteraction.user.id;
-
-      const dto: ShareDocumentDto = {
-        docId: 'doc123',
-        users: ['111111111111111111'],
-        permission: DocumentPermission.WRITE,
-      };
-
-      mockPermissionsService.hasPermission.mockResolvedValueOnce(false);
-
-      await expect(
-        command.onShareDocument(dto, mockInteraction)
-      ).rejects.toThrow(ForbiddenException);
-
-      expect(permissionsService.hasPermission).toHaveBeenCalledWith(
-        dto.docId,
-        discordId,
-        DocumentPermission.ADMIN
-      );
 
       expect(docService.addCollaborators).not.toHaveBeenCalled();
-      expect(mockInteraction.reply).not.toHaveBeenCalled();
+    });
+
+    it('should handle user lacking ADMIN permission', async () => {
+      const userId = mockInteraction.user.id;
+      const docId = 'doc123';
+
+      const mockDocIdResponse = {
+        content: docId,
+        author: { id: userId },
+        delete: jest.fn(),
+      } as unknown as Message;
+
+      (mockChannel.awaitMessages as jest.Mock).mockResolvedValueOnce({
+        first: () => mockDocIdResponse,
+      });
+
+      (permissionsService.hasPermission as jest.Mock).mockResolvedValueOnce(
+        false
+      );
+
+      await command.onShare(mockInteraction);
+
+      expect(mockInteraction.followUp).toHaveBeenCalledWith({
+        content: 'You do not have admin access to this document.',
+        ephemeral: true,
+      });
+
+      expect(docService.addCollaborators).not.toHaveBeenCalled();
+    });
+
+    it('should handle user not responding in time', async () => {
+      (mockChannel.awaitMessages as jest.Mock).mockRejectedValueOnce(
+        new Error('time')
+      );
+
+      await command.onShare(mockInteraction);
+
+      expect(mockInteraction.followUp).toHaveBeenCalledWith({
+        content:
+          'You did not respond in time (30 seconds). Please try the command again.',
+        ephemeral: true,
+      });
+
+      expect(docService.addCollaborators).not.toHaveBeenCalled();
+    });
+
+    it('should handle no users mentioned', async () => {
+      const userId = mockInteraction.user.id;
+      const docId = 'doc123';
+
+      const mockDocIdResponse = {
+        content: docId,
+        author: { id: userId },
+        delete: jest.fn(),
+      } as unknown as Message;
+
+      const mockUsersResponse = {
+        content: '',
+        author: { id: userId },
+        delete: jest.fn(),
+      } as unknown as Message;
+
+      (mockChannel.awaitMessages as jest.Mock)
+        .mockResolvedValueOnce({ first: () => mockDocIdResponse })
+        .mockResolvedValueOnce({ first: () => mockUsersResponse });
+
+      (permissionsService.hasPermission as jest.Mock).mockResolvedValueOnce(
+        true
+      );
+
+      await command.onShare(mockInteraction);
+
+      expect(mockInteraction.followUp).toHaveBeenCalledWith({
+        content: 'No users were mentioned. Please try the command again.',
+        ephemeral: true,
+      });
+
+      expect(docService.addCollaborators).not.toHaveBeenCalled();
+    });
+
+    it('should handle error when channel is null', async () => {
+      const interactionWithNoChannel = {
+        ...mockInteraction,
+        channel: null,
+      } as unknown as CommandInteraction;
+
+      await command.onShare(interactionWithNoChannel);
+
+      expect(interactionWithNoChannel.reply).toHaveBeenCalledWith({
+        content: 'An error occurred: Unable to access the channel.',
+        ephemeral: true,
+      });
+
+      expect(docService.addCollaborators).not.toHaveBeenCalled();
     });
   });
 });
