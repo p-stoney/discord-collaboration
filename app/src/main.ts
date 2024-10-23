@@ -89,6 +89,7 @@ async function bootstrap() {
     process.exit(1);
   }
 
+  // Duplicate line
   app.useWebSocketAdapter(redisIoAdapter);
 
   try {

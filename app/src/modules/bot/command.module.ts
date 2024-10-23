@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
-import { ReflectMetadataProvider } from '@discord-nestjs/core';
+import { DiscordModule } from '@discord-nestjs/core';
 import { DocModule } from '../doc/doc.module';
+import { ReflectMetadataProvider } from '@discord-nestjs/core';
+import { BuilderService, ShareService } from './services';
+import { ShareMenuCollector } from './collectors';
 import {
   CreateCommand,
   DownloadCommand,
@@ -12,9 +15,11 @@ import {
 } from './commands';
 
 @Module({
-  imports: [DocModule],
+  imports: [DocModule, DiscordModule.forFeature()],
   providers: [
     ReflectMetadataProvider,
+    BuilderService,
+    ShareService,
     CreateCommand,
     DownloadCommand,
     ListCommand,
@@ -22,6 +27,7 @@ import {
     OpenCommand,
     RegisterCommand,
     ShareCommand,
+    ShareMenuCollector,
   ],
 })
 export class CommandsModule {}
